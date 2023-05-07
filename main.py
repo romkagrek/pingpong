@@ -26,13 +26,13 @@ class Player(GameSprite):
         keys = key.get_pressed()
         if keys[K_UP] and self.rect.y > 0:
             self.rect.y -= self.speed
-        if keys[K_DOWN] and self.rect.y < width - 80:
+        if keys[K_DOWN] and self.rect.y < width - 300:
             self.rect.y += self.speed
     def update2(self):
         keys = key.get_pressed()
         if keys[K_W] and self.rect.y > 0:
             self.rect.y -= self.speed
-        if keys[K_S] and self.rect.y < width - 80:
+        if keys[K_S] and self.rect.y < width - 300:
             self.rect.y += self.speed
 a = Player("wall.png", 25, 0, 200, 150, 300)
 game = True
