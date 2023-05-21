@@ -1,0 +1,106 @@
+#Создай собственный Шутер!
+from random import randint
+from pygame import *
+from time import sleep
+font.init()
+clock = time.Clock()
+FPS = 60
+width = 700
+high = 500
+window = display.set_mode((width, high))
+display.set_caption("Шутер")
+background = transform.scale(image.load("galaxy.jpg"), (width,high))
+class GameSprite(sprite.Sprite): 
+    def __init__(self, img, speed, x, y, w, h):
+        super().__init__()
+        self.image = transform.scale(image.load(img), (w, h))
+        self.speed = speed
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+    def reset(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+class Player(GameSprite):
+    def update(self):
+        keys = key.get_pressed()
+        if keys[K_LEFT] and self.rect.x > 5:
+            self.rect.x -= self.speed
+        if keys[K_RIGHT] and self.rect.x < 630:
+            self.rect.x += self.speed
+a = Player("rocket.png", 5, 350, 430, 70, 70)
+lost = 0
+score = 0
+class Enemy(GameSprite):
+    def update(self):
+        global lost
+        self.rect.y += self.speed
+        if self.rect.y > 500:
+            self.rect.y = 0
+            self.rect.x = randint(5, 630)
+            lost = lost + 1
+font2 = font.Font(None, 36)
+text_lose = font2.render("Пропущено: " + str(lost), 1, (255, 255, 255))
+text_score = font2.render("Подбито: " + str(score), 1, (255, 255, 255))
+lostt = font2.render("Проигрыш", 1, (231, 238, 50))
+class Bullet(GameSprite):
+    def update(self):
+        if self.rect.y >= 0:
+            self.rect.y -= self.speed
+        if self.rect.y <= 0:
+            self.kill()
+
+c = Bullet("bullet.png", 20, a.rect.x, a.rect.y, 20, 20)
+enemies = sprite.Group()
+for m in range(1 ,6):
+    en = Enemy("ufo.png", 2, randint(80, width - 80), -40, 80, 50)
+    enemies.add(en)
+bullets = sprite.Group()
+bullets.add(c)
+finish = True
+game = True
+sprites_list = sprite.spritecollide(a, enemies, True)
+sprites_list = sprite.groupcollide(bullets, enemies, True, True)
+while game:
+    for e in event.get():
+        if e.type == QUIT:
+            game = False
+        elif e.type == KEYDOWN:
+            if e.key == K_SPACE:
+                mixer.init()
+                mixer.music.load('fire.ogg')
+                mixer.music.play()
+                c = Bullet("bullet.png", 6, a.rect.x, a.rect.y, 20, 20)
+                bullets.add(c)
+                bullets.update()
+    if finish:
+        if lost >= 3:
+            finish = False
+            window.blit(background, (0,0))
+            en.kill()
+        text_lose = font2.render("Пропущено: " + str(lost), 1, (255, 255, 255))
+        text_score = font2.render("Подбито: " + str(score), 1, (255, 255, 255))
+        window.blit(background, (0,0))
+        window.blit(text_lose, (10,0))
+        window.blit(text_score, (10,20))
+        a.reset()
+        a.update()
+        enemies.update()
+        enemies.draw(window)
+        bullets.update()
+        bullets.draw(window)
+
+        mixer.init()
+        mixer.music.load('space.ogg')
+        mixer.music.play()
+        sprites_list = sprite.groupcollide(bullets, enemies, True, True)
+        for i in sprites_list:
+            score += 1
+            en = Enemy("ufo.png", 2, randint(80, width - 80), -40, 80, 50)
+            enemies.add(en)
+    
+        
+        display.update()
+    
+    clock.tick(FPS)
+    
